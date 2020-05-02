@@ -5,8 +5,6 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:vue/recommended",
-    "plugin:vue/essential",
-    "@vue/airbnb",
     "@vue/typescript/recommended"
   ],
   env: {
@@ -69,6 +67,10 @@ module.exports = {
         allowFirstLine: false
       }
     }],
-    "vue/singleline-html-element-content-newline": 0
+    "vue/singleline-html-element-content-newline": 0,
+    "vue/html-closing-bracket-newline": [2, {
+      "singleline": "never",
+      "multiline": "always"
+    }]
   }
 }

@@ -1,61 +1,174 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+    <v-app-bar app color="grey darken-4" dark class="header">
+      <v-app-bar-nav-icon @click="isOpen = !isOpen" />
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+      <div
+        class="d-flex align-center headline ml-5 font-weight-light"
+        style="letter-spacing:0.2em !important"
+      >
+        気象庁防災情報 XML Viewer
       </div>
 
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
+      <div
+        class="d-flex align-center headline ml-10 font-weight-light title"
+        style="letter-spacing:0.2em !important"
+        :class="title === 'Home' ? 'title--hidden' : ''"
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        Title: {{ title }}
+      </div>
+
+      <v-spacer />
+
+      <v-btn color="primary" @click="ShowTitleList">
+        <v-icon>mdi-format-list-bulleted-square</v-icon>
+        <span class="ml-2">CHANGE TITLE</span>
       </v-btn>
     </v-app-bar>
 
-    <v-content>
-      <HelloWorld/>
+    <v-content :class="listView ? 'v-content-darken' : ''">
+      <transition name="fade" mode="out-in">
+        <router-view />
+      </transition>
     </v-content>
+
+    <div
+      class="titleList"
+      :class="listView ? 'titleList-active' : ''"
+      @click="listView = !listView"
+    >
+      <div class="titleList-name">電文種別選択</div>
+      <div class="titleList-box">
+        <div v-for="(v, k) in titles" :key="k" class="titleList-item">{{ v }}</div>
+      </div>
+    </div>
   </v-app>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import Vue from "vue"
+import axios from "axios"
 
 export default Vue.extend({
-  name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
+  name: "App",
   data: () => ({
-    //
+    titles: Array,
+    listView: false
   }),
-});
+  computed: {
+    title: function() {
+      return this.$store.state.title
+    }
+  },
+  async mounted() {
+    const titles = (await axios.get("https://api.vjmx.me/titles.json")).data.titles
+    console.log(titles)
+    this.titles = titles
+  },
+  methods: {
+    ShowTitleList() {
+      this.listView = !this.listView
+    }
+  }
+})
 </script>
+
+<style lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap");
+
+html {
+  overflow: hidden !important;
+}
+
+body {
+  overflow: hidden !important;
+}
+
+* {
+  font-family: "Noto Sans JP", sans-serif;
+}
+
+.v-toolbar__content {
+  height: 64px !important;
+  z-index: 9999;
+}
+</style>
+
+<style lang="scss" scoped>
+.header {
+  height: 64px !important;
+  z-index: 9999;
+  cursor: default;
+}
+
+.titleList {
+  box-sizing: border-box;
+  padding: 30px;
+  position: absolute;
+  width: calc(100vw - 40px);
+  height: calc(100vh - 104px);
+  top: 164px;
+  left: 20px;
+  background-color: #fff;
+  opacity: 0;
+  border-radius: 20px;
+  will-change: top;
+  transition: 0.3s all;
+  cursor: pointer;
+  z-index: -1;
+
+  &-active {
+    top: 84px;
+    z-index: 999;
+    opacity: 1;
+  }
+
+  &-name {
+    padding: 10px 0;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 0.2em;
+  }
+
+  &-box {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  &-item {
+    margin: 15px 7.5px 0;
+    padding: 8px 15px;
+    outline: 1px solid #cdcdcd;
+    text-align: center;
+  }
+}
+
+.v-content {
+  position: relative;
+  padding-top: 60px !important;
+  z-index: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 64px);
+    top: 64px;
+    left: 0;
+    opacity: 0;
+    background-color: #000000;
+    transition: 0.3s all;
+    z-index: 0;
+  }
+
+  &-darken {
+    &::after {
+      opacity: 0.75;
+      z-index: 9998;
+    }
+  }
+}
+</style>
