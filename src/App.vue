@@ -32,14 +32,12 @@
       </transition>
     </v-content>
 
-    <div
-      class="titleList"
-      :class="listView ? 'titleList-active' : ''"
-      @click="listView = !listView"
-    >
+    <div class="titleList" :class="listView ? 'titleList-active' : ''">
       <div class="titleList-name">電文種別選択</div>
       <div class="titleList-box">
-        <div v-for="(v, k) in titles" :key="k" class="titleList-item">{{ v }}</div>
+        <div v-for="(v, k) in titles" :key="k" class="titleList-item" @click="ChangeTitle(k)">
+          {{ v }}
+        </div>
       </div>
     </div>
   </v-app>
@@ -52,22 +50,27 @@ import axios from "axios"
 export default Vue.extend({
   name: "App",
   data: () => ({
-    titles: Array,
+    titles: [""],
     listView: false
   }),
   computed: {
     title: function() {
-      return this.$store.state.title
+      return this.$store.getters.getTitle
     }
   },
   async mounted() {
-    const titles = (await axios.get("https://api.vjmx.me/titles.json")).data.titles
-    console.log(titles)
-    this.titles = titles
+    this.titles = await (async () => (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
   },
   methods: {
     ShowTitleList() {
       this.listView = !this.listView
+    },
+    async ChangeTitle(k: number) {
+      this.listView = !this.listView
+      this.$store.commit("setTitle", (await this.titles)[k])
+      this.$router.push({
+        path: "/" + (k != 0 ? k : "")
+      })
     }
   }
 })
@@ -114,7 +117,7 @@ body {
   border-radius: 20px;
   will-change: top;
   transition: 0.3s all;
-  cursor: pointer;
+  cursor: default;
   z-index: -1;
 
   &-active {
@@ -143,6 +146,13 @@ body {
     padding: 8px 15px;
     outline: 1px solid #cdcdcd;
     text-align: center;
+    transition: 0.3s all;
+    background-color: #ffffff;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #eeeeee;
+    }
   }
 }
 

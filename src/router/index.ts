@@ -9,6 +9,11 @@ const routes: Array<RouteConfig> = [
     path: "/",
     name: "Main",
     component: Main
+  },
+  {
+    path: "/:id(\\d+)",
+    name: "SelectTitle",
+    component: Main
   }
 ]
 
