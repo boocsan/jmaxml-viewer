@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="grey darken-4" dark class="header">
-      <v-app-bar-nav-icon @click="isOpen = !isOpen" />
+      <!-- <v-app-bar-nav-icon @click="isOpen = !isOpen" /> -->
 
       <div
         class="d-flex align-center headline ml-5 font-weight-light"
@@ -10,19 +10,11 @@
         気象庁防災情報 XML Viewer
       </div>
 
-      <div
-        class="d-flex align-center headline ml-10 font-weight-light title"
-        style="letter-spacing:0.2em !important"
-        :class="title === 'Home' ? 'title--hidden' : ''"
-      >
-        Title: {{ title }}
-      </div>
-
       <v-spacer />
 
       <v-btn color="primary" @click="ShowTitleList">
         <v-icon>mdi-format-list-bulleted-square</v-icon>
-        <span class="ml-2">CHANGE TITLE</span>
+        <span class="ml-2">電文種別: {{ title }}</span>
       </v-btn>
     </v-app-bar>
 
@@ -51,7 +43,8 @@ export default Vue.extend({
   name: "App",
   data: () => ({
     titles: [""],
-    listView: false
+    listView: false,
+    now: 0
   }),
   computed: {
     title: function() {
@@ -59,7 +52,9 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    this.titles = await (async () => (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
+    this.titles = await (async () =>
+      (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
+    this.now = this.$store.getters.getTitle !== "すべて" ? this.$store.getters.getTitle : "すべて"
   },
   methods: {
     ShowTitleList() {
@@ -136,19 +131,25 @@ body {
 
   &-box {
     display: flex;
+    padding-bottom: 15px;
+    height: calc(100vh - 229px);
     justify-content: center;
-    align-items: flex-start;
     flex-wrap: wrap;
+    overflow: auto;
   }
 
   &-item {
+    display: flex;
     margin: 15px 7.5px 0;
     padding: 8px 15px;
+    width: 360px;
     outline: 1px solid #cdcdcd;
     text-align: center;
     transition: 0.3s all;
     background-color: #ffffff;
     cursor: pointer;
+    justify-content: center;
+    align-items: center;
 
     &:hover {
       background-color: #eeeeee;
