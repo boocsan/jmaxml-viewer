@@ -43,8 +43,7 @@ export default Vue.extend({
   name: "App",
   data: () => ({
     titles: [""],
-    listView: false,
-    now: 0
+    listView: false
   }),
   computed: {
     title: function() {
@@ -54,7 +53,6 @@ export default Vue.extend({
   async mounted() {
     this.titles = await (async () =>
       (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
-    this.now = this.$store.getters.getTitle !== "すべて" ? this.$store.getters.getTitle : "すべて"
   },
   methods: {
     ShowTitleList() {
@@ -79,6 +77,7 @@ html {
 }
 
 body {
+  position: relative;
   overflow: hidden !important;
 }
 
@@ -90,10 +89,39 @@ body {
   height: 64px !important;
   z-index: 9999;
 }
+
+.v-content {
+  position: absolute;
+  padding-top: 64px !important;
+  top: 0;
+  left: 0;
+  z-index: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: calc(100vh - 64px);
+    top: 64px;
+    left: 0;
+    opacity: 0;
+    background-color: #000000;
+    transition: 0.3s all;
+    z-index: -1;
+  }
+
+  &-darken {
+    &::after {
+      opacity: 0.75;
+      z-index: 9998;
+    }
+  }
+}
 </style>
 
 <style lang="scss" scoped>
 .header {
+  box-sizing: border-box;
   height: 64px !important;
   z-index: 9999;
   cursor: default;
@@ -153,32 +181,6 @@ body {
 
     &:hover {
       background-color: #eeeeee;
-    }
-  }
-}
-
-.v-content {
-  position: relative;
-  padding-top: 60px !important;
-  z-index: 1;
-
-  &::after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: calc(100% - 64px);
-    top: 64px;
-    left: 0;
-    opacity: 0;
-    background-color: #000000;
-    transition: 0.3s all;
-    z-index: 0;
-  }
-
-  &-darken {
-    &::after {
-      opacity: 0.75;
-      z-index: 9998;
     }
   }
 }
