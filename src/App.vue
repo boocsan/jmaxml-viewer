@@ -12,16 +12,19 @@
 
       <v-spacer />
 
-      <v-btn color="primary" @click="ShowTitleList">
+      <v-btn color="warning" :loading="isRefresh" outlined @click="Refresh">
+        <v-icon>mdi-refresh</v-icon>
+        <span class="ml-2">データ更新</span>
+      </v-btn>
+
+      <v-btn color="primary ml-5" @click="ShowTitleList">
         <v-icon>mdi-format-list-bulleted-square</v-icon>
         <span class="ml-2">電文種別: {{ title }}</span>
       </v-btn>
     </v-app-bar>
 
     <v-content :class="listView ? 'v-content-darken' : ''">
-      <transition name="fade" mode="out-in">
-        <router-view />
-      </transition>
+      <Main ref="main" @UpdateRefreshState="UpdateRefreshState" />
     </v-content>
 
     <div class="titleList" :class="listView ? 'titleList-active' : ''">
@@ -38,18 +41,19 @@
 <script lang="ts">
 import Vue from "vue"
 import axios from "axios"
+import Main from "@/components/Main.vue"
 
 export default Vue.extend({
   name: "App",
-  data: () => ({
-    titles: [""],
-    listView: false
-  }),
-  computed: {
-    title: function() {
-      return this.$store.getters.getTitle
-    }
+  components: {
+    Main
   },
+  data: () => ({
+    title: "すべて",
+    titles: [""],
+    listView: false,
+    isRefresh: false
+  }),
   async mounted() {
     this.titles = await (async () =>
       (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
@@ -58,12 +62,19 @@ export default Vue.extend({
     ShowTitleList() {
       this.listView = !this.listView
     },
-    async ChangeTitle(k: number) {
+    ChangeTitle(k: number) {
       this.listView = !this.listView
-      this.$store.commit("setTitle", (await this.titles)[k])
-      this.$router.push({
-        path: "/" + (k != 0 ? k : "")
-      })
+      this.title = this.titles[k]
+      // eslint-disable-next-line no-extra-parens
+      ;(this.$refs.main as InstanceType<typeof Main>).LoadList(this.title)
+    },
+    Refresh() {
+      this.isRefresh = true
+      // eslint-disable-next-line no-extra-parens
+      ;(this.$refs.main as InstanceType<typeof Main>).LoadList(this.title)
+    },
+    UpdateRefreshState(x: boolean) {
+      this.isRefresh = x
     }
   }
 })
