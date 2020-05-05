@@ -251,9 +251,11 @@ export default Vue.extend({
       flex-flow: column;
       background-color: #ffffff;
       transition: 0.3s all;
+      z-index: 20;
 
       &-hidden {
         opacity: 0;
+        z-index: -1;
       }
     }
 
