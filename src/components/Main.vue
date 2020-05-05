@@ -3,7 +3,7 @@
     <div class="main_list">
       <v-card class="mx-auto" width="400" max-width="400" min-width="400" tile>
         <v-list dense>
-          <v-list-item-group v-model="no" color="primary" :mandatory="true">
+          <v-list-item-group v-model="no" color="primary">
             <v-list-item v-for="(v, k) in xmls" :key="k" @click="ViewDetail(k)">
               <v-list-item-content>
                 <v-list-item-title v-html="v" />
@@ -92,28 +92,35 @@ export default Vue.extend({
   components: {
     Loading
   },
-  props: {
-    title: {
-      type: String,
-      default: "すべて"
-    }
-  },
   data: () => ({
-    no: 0,
+    title: "",
+    no: -1,
+    now: -1,
     urls: [""],
     xmls: [""],
     xml: "",
     isShow: false,
-    isInfo: true
+    isInfo: true,
+    offset: 30,
+    isAdding: false
   }),
+  updated() {
+    this.$emit("")
+  },
   mounted() {
     this.LoadList("すべて")
   },
-  updated: function() {
-    this.$emit("")
-  },
   methods: {
     async LoadList(t: string) {
+      const AddList = this.AddList
+      const list = document.querySelector(".main_list") as HTMLElement
+      list.onscroll = function() {
+        const scroll = list.scrollHeight - list.offsetHeight - list.scrollTop
+        if (scroll < 100) AddList()
+      }
+      this.title = t
+      // eslint-disable-next-line no-extra-parens
+      ;(document.querySelector(".main_list") as HTMLElement).scrollTo(0, 0)
       const json = await (async () =>
         (
           await axios.get<Detail[]>(
@@ -130,11 +137,19 @@ export default Vue.extend({
       else xmls.push("データなし")
       this.urls = urls.filter(x => x)
       this.xmls = xmls.filter(x => x)
+      this.offset = 30
+      this.isAdding = false
       await wait(1000)
       this.$emit("UpdateRefreshState", false)
     },
     async ViewDetail(k: number) {
       this.isShow = false
+      if (this.now === k) {
+        this.now = -1
+        this.isInfo = true
+        return
+      }
+      this.now = k
       this.isInfo = false
       await wait(300)
       if (this.urls.length === 0) return
@@ -143,6 +158,29 @@ export default Vue.extend({
       await wait(500)
       window.hljs.highlightBlock(document.querySelector(".xml"))
       this.isShow = true
+    },
+    async AddList() {
+      if (this.isAdding) return
+      this.isAdding = true
+      const json = await (async () =>
+        (
+          await axios.get<Detail[]>(
+            `https://api.vjmx.me/lists.json?offset=${
+              this.title !== "すべて" ? `${this.offset}&title=${this.title}` : this.offset
+            }`
+          )
+        ).data)()
+      const urls = [""]
+      const xmls = [""]
+      if (json[0].ID === "") return
+      json.forEach(x => {
+        urls.push(`https://xml.jmaxml.me/?ID=${x.ID}`)
+        xmls.push(`${x.title === x.name ? x.title : x.name} (${x.time}発表)<br>${x.headline}`)
+      })
+      this.urls.push(...urls.filter(x => x))
+      this.xmls.push(...xmls.filter(x => x))
+      this.offset += 30
+      this.isAdding = false
     }
   }
 })
