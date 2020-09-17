@@ -12,19 +12,24 @@
 
       <v-spacer />
 
-      <v-btn color="warning" :loading="isRefresh" outlined @click="Refresh">
+      <v-btn color="teal" outlined @click="Open">
+        <v-icon>mdi-open-in-new</v-icon>
+        <span class="ml-2">XML を開く</span>
+      </v-btn>
+
+      <v-btn class="ml-5" color="warning" :loading="isRefresh" outlined @click="Refresh">
         <v-icon>mdi-refresh</v-icon>
         <span class="ml-2">データ更新</span>
       </v-btn>
 
-      <v-btn color="primary ml-5" @click="ShowTitleList">
+      <v-btn class="ml-5" color="primary" @click="ShowTitleList">
         <v-icon>mdi-format-list-bulleted-square</v-icon>
         <span class="ml-2">電文種別: {{ title }}</span>
       </v-btn>
     </v-app-bar>
 
     <v-content :class="listView ? 'v-content-darken' : ''">
-      <Main ref="main" @UpdateRefreshState="UpdateRefreshState" />
+      <Main ref="main" @UpdateRefreshState="UpdateRefreshState" @url="xmlUrl = $event" />
     </v-content>
 
     <div class="titleList" :class="listView ? 'titleList-active' : ''">
@@ -52,7 +57,8 @@ export default Vue.extend({
     title: "すべて",
     titles: [""],
     listView: false,
-    isRefresh: false
+    isRefresh: false,
+    xmlUrl: ""
   }),
   async mounted() {
     this.titles = await (async () =>
@@ -67,6 +73,9 @@ export default Vue.extend({
       this.title = this.titles[k]
       // eslint-disable-next-line no-extra-parens
       ;(this.$refs.main as InstanceType<typeof Main>).LoadList(this.title)
+    },
+    Open() {
+      window.open(this.xmlUrl)
     },
     Refresh() {
       this.isRefresh = true

@@ -153,6 +153,7 @@ export default Vue.extend({
       this.isInfo = false
       await wait(300)
       if (this.urls.length === 0) return
+      this.$emit("url", this.urls[k])
       const xml = await axios.get<string>(this.urls[k])
       this.xml = FormatXml(xml.data)
       await wait(500)
