@@ -1,3 +1,3 @@
 # jmaxml-viewer
 
-[https://vjmx.me](https://vjmx.me)
+[https://jmx.app](https://jmx.app)
