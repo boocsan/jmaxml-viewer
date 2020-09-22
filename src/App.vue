@@ -62,7 +62,7 @@ export default Vue.extend({
   }),
   async mounted() {
     this.titles = await (async () =>
-      (await axios.get<string[]>("https://api.vjmx.me/titles.json")).data)()
+      (await axios.get<string[]>("https://api.jmx.app/titles.json")).data)()
   },
   methods: {
     ShowTitleList() {

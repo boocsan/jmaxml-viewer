@@ -124,14 +124,14 @@ export default Vue.extend({
       const json = await (async () =>
         (
           await axios.get<Detail[]>(
-            `https://api.vjmx.me/lists.json?${t !== "すべて" ? `title=${t}` : ""}`
+            `https://api.jmx.app/lists.json?${t !== "すべて" ? `title=${t}` : ""}`
           )
         ).data)()
       const urls = [""]
       const xmls = [""]
       if (json[0].ID !== "")
         json.forEach(x => {
-          urls.push(`https://xml.jmaxml.me/?ID=${x.ID}`)
+          urls.push(`https://xml.jmx.app/?ID=${x.ID}`)
           xmls.push(`${x.title === x.name ? x.title : x.name} (${x.time}発表)<br>${x.headline}`)
         })
       else xmls.push("データなし")
@@ -166,7 +166,7 @@ export default Vue.extend({
       const json = await (async () =>
         (
           await axios.get<Detail[]>(
-            `https://api.vjmx.me/lists.json?offset=${
+            `https://api.jmx.app/lists.json?offset=${
               this.title !== "すべて" ? `${this.offset}&title=${this.title}` : this.offset
             }`
           )
@@ -175,7 +175,7 @@ export default Vue.extend({
       const xmls = [""]
       if (json[0].ID === "") return
       json.forEach(x => {
-        urls.push(`https://xml.jmaxml.me/?ID=${x.ID}`)
+        urls.push(`https://xml.jmx.app/?ID=${x.ID}`)
         xmls.push(`${x.title === x.name ? x.title : x.name} (${x.time}発表)<br>${x.headline}`)
       })
       this.urls.push(...urls.filter(x => x))
